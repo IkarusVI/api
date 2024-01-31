@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Guest extends Model
 {
     use HasFactory;
+
+    protected $primaryKey = 'email';
+    public $incrementing = false; 
+    protected $keyType = 'string'; 
 }

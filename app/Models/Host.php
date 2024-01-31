@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Host extends Model
 {
     use HasFactory;
+
+    protected $primaryKey = 'email';
+    public $incrementing = false; 
+    protected $keyType = 'string'; 
+
 }
