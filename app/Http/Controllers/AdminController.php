@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Admin;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 
 class AdminController extends Controller
@@ -64,7 +66,7 @@ class AdminController extends Controller
 
                 $admin = new Admin();
                 $admin->email = $email;
-                $admin->password = $request->password;
+                $admin->password = Hash::make($request->password);
                 $admin->save();
 
                 $msg = [
@@ -98,13 +100,27 @@ class AdminController extends Controller
 
     protected function modify(Request $request, $email)
     {
+
+        $validator = Validator::make($request->all(), [
+            'password' => 'required'
+        ]);
+    
+        if ($validator->fails()) {
+            $msg = [
+                'msg' => 'La contraseña es requerida',
+                'status' => 'failed',
+                'code' => '400',
+            ];
+            return response()->json($msg);
+        }
+
         $newPassword = $request->input('password');
         $admin = Admin::where('email',$email)->first();
 
         if($admin){
            $oldPassword = $admin->password; 
-           if($oldPassword != $newPassword){
-                $admin->password = $newPassword;
+           if((!Hash::check($newPassword, $oldPassword))){
+                $admin->password = Hash::make($newPassword);
                 $admin->save();
                 $msg = [
                     'msg' => 'Contraseña actualizada correctamente',

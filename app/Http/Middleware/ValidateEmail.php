@@ -22,16 +22,16 @@ class ValidateEmail
 
         if (!is_numeric($email) && strpos($email, '@') !== false && (str_ends_with($email, '.es') || str_ends_with($email, '.com'))) {
             return $next($request);
-        } else {
-
-            $msg= [
-                'msg' => 'Email no es válido',
-                'status' => 'failed',
-                'code' => '400'
-            ];
-
-            return response()->json($msg);
         }
+
+        $msg= [
+            'msg' => 'Email no es válido',
+            'status' => 'failed',
+            'code' => '400'
+        ];
+
+        return response()->json($msg);
+        
     }
 
 }

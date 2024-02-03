@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('userName');
-            $table->string('password');
-            $table->string('token')->nullable();
-            $table->timestamps();
+        Schema::table('personal_access_tokens', function (Blueprint $table) {
+            $table->string('tokenable_id')->change();
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::table('personal_access_tokens', function (Blueprint $table) {
+            $table->integer('tokenable_id')->change();
+        });
     }
 };

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HostController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\LoginController;
 
 
 /*
@@ -51,3 +52,10 @@ Route::prefix('guest')->controller(GuestController::class)->group(function () {
     Route::delete('/{email}','delete')->middleware('validate.email');
 
 });
+
+
+Route::post('/login', [LoginController::class,'login']);
+
+Route::get('/logout', [LoginController::class,'killToken'])->middleware('validate.login');;
+
+Route::get('/profile',[LoginController::class,'identify'])->middleware('validate.login');

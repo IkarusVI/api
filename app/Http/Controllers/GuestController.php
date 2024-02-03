@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Guest;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class GuestController extends Controller
 {
@@ -64,7 +66,7 @@ class GuestController extends Controller
 
                 $guest = new Guest();
                 $guest->email = $email;
-                $guest->password = $request->password;
+                $guest->password = Hash::make($request->password);
                 $guest->save();
 
                 $msg = [
@@ -98,14 +100,28 @@ class GuestController extends Controller
 
     protected function modify(Request $request, $email)
     {
+        
+        $validator = Validator::make($request->all(), [
+            'password' => 'required'
+        ]);
+    
+        if ($validator->fails()) {
+            $msg = [
+                'msg' => 'La contraseña es requerida',
+                'status' => 'failed',
+                'code' => '400',
+            ];
+            return response()->json($msg);
+        }
+
         $newPassword = $request->input('password');
         $guest = Guest::where('email',$email)->first();
 
         if($guest){
            $oldPassword = $guest->password; 
-           if($oldPassword != $newPassword){
-                $guest->password = $newPassword;
-                $guest->save();
+           if((!Hash::check($newPassword, $oldPassword))){
+            $guest->password = Hash::make($newPassword);
+            $guest->save();
                 $msg = [
                     'msg' => 'Contraseña actualizada correctamente',
                     'status' => 'success',

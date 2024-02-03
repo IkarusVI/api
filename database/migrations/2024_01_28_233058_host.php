@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('hosts', function (Blueprint $table) {
             $table->string('email')->primary();
+            $table->string('userName');
             $table->string('password');
             $table->string('token')->nullable();
             $table->timestamps();

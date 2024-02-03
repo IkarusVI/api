@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Host;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class HostController extends Controller
 {
@@ -64,7 +66,7 @@ class HostController extends Controller
 
                 $host = new Host();
                 $host->email = $email;
-                $host->password = $request->password;
+                $host->password = Hash::make($request->password);
                 $host->save();
 
                 $msg = [
@@ -98,14 +100,28 @@ class HostController extends Controller
 
     protected function modify(Request $request, $email)
     {
+        
+        $validator = Validator::make($request->all(), [
+            'password' => 'required'
+        ]);
+    
+        if ($validator->fails()) {
+            $msg = [
+                'msg' => 'La contraseña es requerida',
+                'status' => 'failed',
+                'code' => '400',
+            ];
+            return response()->json($msg);
+        }
+
         $newPassword = $request->input('password');
         $host = Host::where('email',$email)->first();
 
         if($host){
            $oldPassword = $host->password; 
-           if($oldPassword != $newPassword){
-                $host->password = $newPassword;
-                $host->save();
+           if((!Hash::check($newPassword, $oldPassword))){
+            $host->password = Hash::make($newPassword);
+            $host->save();
                 $msg = [
                     'msg' => 'Contraseña actualizada correctamente',
                     'status' => 'success',
@@ -128,7 +144,6 @@ class HostController extends Controller
         ];
         return response($msg);
     }
-
     protected function delete(Request $request, $email)
     {
         $host=Host::where('email',$email)->first();
