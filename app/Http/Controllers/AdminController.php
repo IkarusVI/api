@@ -23,9 +23,9 @@ class AdminController extends Controller
         return response()->json($msg);
     }
 
-    protected function getOne(Request $request, $email)
+    protected function getOne(Request $request, $id)
     {
-        $admin = Admin::where('email',$email)->first();
+        $admin = Admin::where('id',$id)->first();
         if (!$admin) {
             $msg = [
                 'msg' => 'Admin no encontrado',
@@ -46,7 +46,7 @@ class AdminController extends Controller
 
     protected function create(Request $request)
     {
-        if($request->password==null || $request->email==null){
+        if($request->password==null || $request->email==null || $request->userName==null){
             $msg = [
                 'msg' => 'Uno o mas campos vacios',
                 'status' => 'failed',
@@ -57,26 +57,30 @@ class AdminController extends Controller
         }
         $email =$request->email;
 
-        $existingAdmin = Admin::where('email',$email)->first();
+        $existingAdminMail = Admin::where('email',$email)->first();
+
+        $userName =$request->userName;
+
+        $existingAdminUserName = Admin::where('userName',$userName)->first();
         
         
-        if (!$existingAdmin) {
+        if (!$existingAdminMail && !$existingAdminUserName) {
 
             if (!is_numeric($email) && strpos($email, '@') !== false && (str_ends_with($email, '.es') || str_ends_with($email, '.com'))) {
 
-                $admin = new Admin();
-                $admin->email = $email;
-                $admin->password = Hash::make($request->password);
-                $admin->save();
+                $Admin = new Admin();
+                $Admin->email = $email;
+                $Admin->userName = $userName;
+                $Admin->password = Hash::make($request->password);
+                $Admin->save();
 
                 $msg = [
-                    'msg' => 'Nuevo administrador creado con éxito',
+                    'msg' => 'Nuevo admin creado con éxito',
                     'status' => 'success',
                     'code' => '201',
                     'data' => $admin
                 ];
                 return response()->json($msg);
-
             } 
     
             $msg= [
@@ -90,7 +94,7 @@ class AdminController extends Controller
         }
         $msg = [
 
-            'msg' => 'Este administrador ya existe',
+            'msg' => 'Este admin ya existe',
             'status' => 'failed',
             'code' => '400',
         ];
@@ -145,9 +149,9 @@ class AdminController extends Controller
         return response($msg);
     }
 
-    protected function delete(Request $request, $email)
+    protected function delete(Request $request, $id)
     {
-        $admin=Admin::where('email',$email)->first();
+        $admin=Admin::where('id',$id)->first();
 
         if (!$admin) {
             $msg = [

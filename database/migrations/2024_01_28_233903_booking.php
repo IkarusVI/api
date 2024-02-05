@@ -12,14 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
-            $table->string('hostEmail');
-            $table->foreign('hostEmail')->references('email')->on('hosts');
+            $table->increments('id');
+            
+            $table->unsignedBigInteger('hostId');
+            $table->foreign('hostId')->references('id')->on('hosts');
 
-            $table->string('guestEmail');
-            $table->foreign('guestEmail')->references('email')->on('guests');
+            $table->unsignedBigInteger('guestId');
+            $table->foreign('guestId')->references('id')->on('guests');
 
-            $table->string('houseName');
-            $table->foreign('houseName')->references('name')->on('houses');
+            $table->unsignedBigInteger('houseId');
+            $table->foreign('houseId')->references('id')->on('houses');
 
             $table->datetime('checkIn');
             $table->datetime('checkOut');

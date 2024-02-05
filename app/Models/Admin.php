@@ -10,12 +10,4 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class Admin extends Authenticatable 
 {
     use HasFactory, HasApiTokens;
-
-    protected $primaryKey = 'email';
-    public $incrementing = false; 
-    protected $keyType = 'string'; 
-
-    protected $hidden = [
-
-    ];
 }

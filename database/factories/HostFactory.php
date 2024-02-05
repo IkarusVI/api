@@ -19,7 +19,7 @@ class HostFactory extends Factory
     {
         return [
             'email'    => $this->faker->email(),
-            'name'     => $this->faker->userName,
+            'userName'     => $this->faker->userName,
             'password' => Hash::make($this->faker->password()),
         ];
     }

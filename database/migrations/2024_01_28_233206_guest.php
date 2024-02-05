@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('guests', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->bigIncrements('id');
+            $table->string('email')->unique();
             $table->string('userName');
             $table->string('password');
-            $table->string('token')->nullable();
             $table->timestamps();
         });
     }

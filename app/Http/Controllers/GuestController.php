@@ -23,9 +23,9 @@ class GuestController extends Controller
         return response()->json($msg);
     }
 
-    protected function getOne(Request $request, $email)
+    protected function getOne(Request $request, $id)
     {
-        $guest = Guest::where('email',$email)->first();
+        $guest = Guest::where('id',$id)->first();
         if (!$guest) {
             $msg = [
                 'msg' => 'Guest no encontrado',
@@ -46,7 +46,7 @@ class GuestController extends Controller
 
     protected function create(Request $request)
     {
-        if($request->password==null || $request->email==null){
+        if($request->password==null || $request->email==null || $request->userName==null){
             $msg = [
                 'msg' => 'Uno o mas campos vacios',
                 'status' => 'failed',
@@ -57,15 +57,20 @@ class GuestController extends Controller
         }
         $email =$request->email;
 
-        $existingGuest = Guest::where('email',$email)->first();
+        $existingGuestMail = Guest::where('email',$email)->first();
+
+        $userName =$request->userName;
+
+        $existingGuestUserName = Guest::where('userName',$userName)->first();
         
         
-        if (!$existingGuest) {
+        if (!$existingGuestMail && !$existingGuestUserName) {
 
             if (!is_numeric($email) && strpos($email, '@') !== false && (str_ends_with($email, '.es') || str_ends_with($email, '.com'))) {
 
                 $guest = new Guest();
                 $guest->email = $email;
+                $guest->userName = $userName;
                 $guest->password = Hash::make($request->password);
                 $guest->save();
 
@@ -145,9 +150,9 @@ class GuestController extends Controller
         return response($msg);
     }
 
-    protected function delete(Request $request, $email)
+    protected function delete(Request $request, $id)
     {
-        $guest=Guest::where('email',$email)->first();
+        $guest=Guest::where('id',$id)->first();
 
         if (!$guest){
             $msg = [

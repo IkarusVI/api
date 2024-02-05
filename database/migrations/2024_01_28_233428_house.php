@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('houses', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->string('image');
 
-            $table->string('owner');
-            $table->foreign('owner')->references('email')->on('hosts');
-
-            $table->string('name')->primary();
+            $table->unsignedBigInteger('host_id');
+            $table->foreign('host_id')->references('id')->on('hosts');
+        
+            $table->string('name');
             $table->string('location');
             $table->text('description');
             $table->double('price',8,2);

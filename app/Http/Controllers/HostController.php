@@ -23,9 +23,9 @@ class HostController extends Controller
         return response()->json($msg);
     }
 
-    protected function getOne(Request $request, $email)
+    protected function getOne(Request $request, $id)
     {
-        $host = Host::where('email',$email)->first();
+        $host = Host::where('id',$id)->first();
         if (!$host) {
             $msg = [
                 'msg' => 'Host no encontrado',
@@ -46,7 +46,7 @@ class HostController extends Controller
 
     protected function create(Request $request)
     {
-        if($request->password==null || $request->email==null){
+        if($request->password==null || $request->email==null || $request->userName==null){
             $msg = [
                 'msg' => 'Uno o mas campos vacios',
                 'status' => 'failed',
@@ -57,15 +57,20 @@ class HostController extends Controller
         }
         $email =$request->email;
 
-        $existingHost = Host::where('email',$email)->first();
+        $existingHostMail = Host::where('email',$email)->first();
+
+        $userName =$request->userName;
+
+        $existingHostUserName = Host::where('userName',$userName)->first();
         
         
-        if (!$existingHost) {
+        if (!$existingHostMail && !$existingHostUserName) {
 
             if (!is_numeric($email) && strpos($email, '@') !== false && (str_ends_with($email, '.es') || str_ends_with($email, '.com'))) {
 
                 $host = new Host();
                 $host->email = $email;
+                $host->userName = $userName;
                 $host->password = Hash::make($request->password);
                 $host->save();
 
@@ -144,9 +149,9 @@ class HostController extends Controller
         ];
         return response($msg);
     }
-    protected function delete(Request $request, $email)
+    protected function delete(Request $request, $id)
     {
-        $host=Host::where('email',$email)->first();
+        $host=Host::where('id',$id)->first();
 
         if (!$host) {
             $msg = [

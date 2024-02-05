@@ -6,16 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Host extends Authenticatable
 {
     use HasFactory, HasApiTokens;
 
-    protected $primaryKey = 'email';
-    public $incrementing = false; 
-    protected $keyType = 'string'; 
+    public function houses(): HasMany
+    {
+        return $this->hasMany(House::class);
+    }
 
-    protected $hidden = [
-    ];
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
 
 }
