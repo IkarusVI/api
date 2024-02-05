@@ -26,30 +26,30 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('admin')->controller(AdminController::class)->group(function () {
 
     Route::get('/'          ,'getAll');
-    Route::get('/{id}'      ,'getOne')->middleware('validate.email');
+    Route::get('/{id}'      ,'getOne');
     Route::post('/'         ,'create');
-    Route::put('/{email}'   ,'modify')->middleware('validate.email');;
-    Route::delete('/{id}','delete')->middleware('validate.email');
+    Route::put('/{email}'   ,'modify')->middleware('validate.email');
+    Route::delete('/{id}','delete');
 
 });
 
 Route::prefix('host')->controller(HostController::class)->group(function () {
 
     Route::get('/'          ,'getAll');
-    Route::get('/{id}'      ,'getOne')->middleware('validate.email');
+    Route::get('/{id}'      ,'getOne');
     Route::post('/'         ,'create');
-    Route::put('/{email}'   ,'modify')->middleware('validate.email');;
-    Route::delete('/{id}','delete')->middleware('validate.email');
+    Route::put('/{email}'   ,'modify')->middleware('validate.email');
+    Route::delete('/{id}','delete');
 
 });
 
 Route::prefix('guest')->controller(GuestController::class)->group(function () {
 
     Route::get('/'          ,'getAll');
-    Route::get('/{id}'      ,'getOne')->middleware('validate.email');
+    Route::get('/{id}'      ,'getOne');
     Route::post('/'         ,'create');
-    Route::put('/{email}'   ,'modify')->middleware('validate.email');;
-    Route::delete('/{id}','delete')->middleware('validate.email');
+    Route::put('/{email}'   ,'modify')->middleware('validate.email');
+    Route::delete('/{id}','delete');
 
 });
 
