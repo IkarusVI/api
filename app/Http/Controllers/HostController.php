@@ -103,56 +103,99 @@ class HostController extends Controller
      
     }
 
-    protected function modify(Request $request, $email)
+    protected function modify(Request $request, $id=null)
     {
-        
         $validator = Validator::make($request->all(), [
-            'password' => 'required'
+            'password' =>   'required_without_all:username,email',
+            'username' =>   'required_without_all:password,email',
+            'email'    =>   'required_without_all:password,username|email',
         ]);
     
         if ($validator->fails()) {
             $msg = [
-                'msg' => 'La contraseña es requerida',
+                'msg' => 'Debe proporcionar al menos un campo',
                 'status' => 'failed',
                 'code' => '400',
             ];
             return response()->json($msg);
         }
 
-        $newPassword = $request->input('password');
-        $host = Host::where('email',$email)->first();
-
-        if($host){
-           $oldPassword = $host->password; 
-           if((!Hash::check($newPassword, $oldPassword))){
-            $host->password = Hash::make($newPassword);
-            $host->save();
-                $msg = [
-                    'msg' => 'Contraseña actualizada correctamente',
-                    'status' => 'success',
-                    'code' => '200',
-                    'data' => $host
-                ];
-                return response()->json($msg);
-           }
-           $msg = [
-            'msg' => 'Contraseña no se cambio ya que son identicas',
-            'status' => 'failed',
-            'code' => '400',
+        if ($id) {
+            $host = Host::find($id);
+        }else{
+            $host = $request->user;
+        }
+        
+        if (!$host) {
+            $msg = [
+                'msg' => 'No se encontró al host',
+                'status' => 'failed',
+                'code' => '400',
             ];
             return response()->json($msg);
         }
+    
+        if ($request->filled('password')) {
+            $newPassword = $request->input('password');
+            $oldPassword = $host->password;
+    
+            if (Hash::check($newPassword, $oldPassword)) {
+                $msg = [
+                    'msg' => 'La contraseña no ha cambiado ya que es idéntica a la anterior',
+                    'status' => 'failed',
+                    'code' => '400',
+                ];
+                return response()->json($msg);
+            }
+    
+            $host->password = Hash::make($newPassword);
+        }
+    
+        if ($request->filled('username')) {
+            $newUsername = $request->input('username');
+            if ($newUsername === $host->userName) {
+                $msg = [
+                    'msg' => 'El username no ha cambiado ya que es idéntico al anterior',
+                    'status' => 'failed',
+                    'code' => '400',
+                ];
+                return response()->json($msg);
+            }
+            $host->userName = $newUsername;
+        }
+    
+        if ($request->filled('email')) {
+            $newEmail = $request->input('email');
+            if ($newEmail === $host->email) {
+                $msg = [
+                    'msg' => 'El email no ha cambiado ya que es idéntico al anterior',
+                    'status' => 'failed',
+                    'code' => '400',
+                ];
+                return response()->json($msg);
+            }
+            $host->email = $newEmail;
+        }
+    
+        $host->save();
+    
         $msg = [
-            'msg' => 'No se encontró al host',
-            'status' => 'failed',
-            'code' => '400',
+            'msg' => 'Datos actualizados correctamente',
+            'status' => 'success',
+            'code' => '200',
+            'data' => $host
         ];
-        return response($msg);
+        return response()->json($msg);
+            
     }
-    protected function delete(Request $request, $id)
+    
+    protected function delete(Request $request, $id=null)
     {
-        $host=Host::where('id',$id)->first();
-
+        if ($id) {
+            $host = Host::find($id);
+        }else{
+            $host = $request->user;
+        }
         if (!$host) {
             $msg = [
                 'msg' => 'Host no encontrado',
@@ -169,6 +212,42 @@ class HostController extends Controller
             'data' => $host
         ];
 
+        return response()->json($msg);
+
+    }
+
+    protected function getBookings(Request $request, $id=null){
+        
+        if($id){
+            $host = Host::findOrFail($id);
+        }else{
+            $host = Host::findOrFail($request->user->id);
+        }
+
+        $bookings = $host->bookings;
+        $msg = [
+            'msg' => 'Reservas del host '.$host->id,
+            'status' => 'success',
+            'code' => '201',
+            'data' => $bookings
+        ];
+        return response()->json($msg);
+
+    }
+
+    protected function getHouses(Request $request, $id=null){
+        if($id){
+            $host = Host::findOrFail($id);
+        }else{
+            $host = Host::findOrFail($request->user->id);
+        }
+        $houses = $host->houses;
+        $msg = [
+            'msg' => 'Casas del host '.$host->id,
+            'status' => 'success',
+            'code' => '201',
+            'data' => $houses
+        ];
         return response()->json($msg);
 
     }

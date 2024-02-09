@@ -12,7 +12,7 @@ use App\Models\Admin;
 use App\Models\Guest;
 use App\Models\Host;
 
-class ValidateLogin
+class ValidateGuestPermissions
 {
     /**
      * Handle an incoming request.
@@ -25,7 +25,7 @@ class ValidateLogin
 
         if (!$token) {
             $msg = [
-                'msg' => 'Usuario no identificado',
+                'msg' => 'Acceso Denegado, Inicia Sesión Como Guest',
                 'status' => 'failed',
                 'code'=> 401
             ];
@@ -36,7 +36,14 @@ class ValidateLogin
             $user = Auth::guard('sanctum')->user();
             $request->user = $user;
             $userClass = class_basename(($user));
-            $request->class = $userClass;
+            if($userClass!='Guest'){
+                $msg = [
+                    'msg' => 'Acceso denegado guest',
+                    'status' => 'failed',
+                    'code'=> 401
+                ];
+                return response()->json($msg); 
+            }
             return $next($request);
         }
         $msg = [

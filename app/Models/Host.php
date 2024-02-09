@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+//use Laravel\Passport\HasApiTokens;
 
 class Host extends Authenticatable
 {
@@ -14,12 +15,12 @@ class Host extends Authenticatable
 
     public function houses(): HasMany
     {
-        return $this->hasMany(House::class);
+        return $this->hasMany(House::class,   'host_id');
     }
 
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Booking::class, 'hostId');
     }
 
 }

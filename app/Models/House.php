@@ -13,14 +13,14 @@ class House extends Model
 
     public function house(): BelongsTo
     {
-        return $this->belongsTo(Host::class);
+        return $this->belongsTo(Host::class, 'hostId');
     }
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Booking::class, 'houseId');
     }
     public function favorites(): HasMany
     {
-        return $this->hasMany(Favorite::class);
+        return $this->hasMany(Favorite::class, 'hostId');
     }
 }

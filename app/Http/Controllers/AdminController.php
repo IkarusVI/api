@@ -68,11 +68,11 @@ class AdminController extends Controller
 
             if (!is_numeric($email) && strpos($email, '@') !== false && (str_ends_with($email, '.es') || str_ends_with($email, '.com'))) {
 
-                $Admin = new Admin();
-                $Admin->email = $email;
-                $Admin->userName = $userName;
-                $Admin->password = Hash::make($request->password);
-                $Admin->save();
+                $admin = new Admin();
+                $admin->email = $email;
+                $admin->userName = $userName;
+                $admin->password = Hash::make($request->password);
+                $admin->save();
 
                 $msg = [
                     'msg' => 'Nuevo admin creado con éxito',
@@ -102,51 +102,88 @@ class AdminController extends Controller
      
     }
 
-    protected function modify(Request $request, $email)
+    protected function modify(Request $request)
     {
-
+        
         $validator = Validator::make($request->all(), [
-            'password' => 'required'
+            'password' =>   'required_without_all:username,email',
+            'username' =>   'required_without_all:password,email',
+            'email'    =>   'required_without_all:password,username|email',
         ]);
-    
+
         if ($validator->fails()) {
             $msg = [
-                'msg' => 'La contraseña es requerida',
+                'msg' => 'Debe proporcionar al menos un campo',
+                'status' => 'failed',
+                'code' => '400',
+            ];
+            return response()->json($msg);
+        }
+        $admin = $request->user;
+
+        if (!$admin) {
+            $msg = [
+                'msg' => 'No se encontró al administrador',
                 'status' => 'failed',
                 'code' => '400',
             ];
             return response()->json($msg);
         }
 
-        $newPassword = $request->input('password');
-        $admin = Admin::where('email',$email)->first();
+        if ($request->filled('password')) {
+            $newPassword = $request->input('password');
+            $oldPassword = $admin->password;
 
-        if($admin){
-           $oldPassword = $admin->password; 
-           if((!Hash::check($newPassword, $oldPassword))){
-                $admin->password = Hash::make($newPassword);
-                $admin->save();
+            if (Hash::check($newPassword, $oldPassword)) {
                 $msg = [
-                    'msg' => 'Contraseña actualizada correctamente',
-                    'status' => 'success',
-                    'code' => '200',
-                    'data' => $admin
+                    'msg' => 'La contraseña no ha cambiado ya que es idéntica a la anterior',
+                    'status' => 'failed',
+                    'code' => '400',
                 ];
                 return response()->json($msg);
-           }
-           $msg = [
-            'msg' => 'Contraseña no se cambio ya que son identicas',
-            'status' => 'failed',
-            'code' => '400',
-            ];
-            return response()->json($msg);
+            }
+
+            $admin->password = Hash::make($newPassword);
         }
+
+        if ($request->filled('username')) {
+            $newUsername = $request->input('username');
+            if ($newUsername === $admin->userName) {
+                $msg = [
+                    'msg' => 'El username no ha cambiado ya que es idéntico al anterior',
+                    'status' => 'failed',
+                    'code' => '400',
+                ];
+                return response()->json($msg);
+            }
+            $admin->userName = $newUsername;
+        }
+
+        if ($request->filled('email')) {
+            $newEmail = $request->input('email');
+            if ($newEmail === $admin->email) {
+                $msg = [
+                    'msg' => 'El email no ha cambiado ya que es idéntico al anterior',
+                    'status' => 'failed',
+                    'code' => '400',
+                ];
+                return response()->json($msg);
+            }
+            $admin->email = $newEmail;
+        }
+
+        $admin->save();
+
         $msg = [
-            'msg' => 'No se encontró al administrador',
-            'status' => 'failed',
-            'code' => '400',
+            'msg' => 'Datos actualizados correctamente',
+            'status' => 'success',
+            'code' => '200',
+            'data' => $admin
         ];
-        return response($msg);
+        
+        return response()->json($msg);
+            
+        
     }
 
     protected function delete(Request $request, $id)

@@ -15,19 +15,20 @@ return new class extends Migration
             $table->increments('id');
             
             $table->unsignedBigInteger('hostId');
-            $table->foreign('hostId')->references('id')->on('hosts');
+            $table->foreign('hostId')->references('id')->on('hosts')->onDelete('cascade');
 
             $table->unsignedBigInteger('guestId');
-            $table->foreign('guestId')->references('id')->on('guests');
+            $table->foreign('guestId')->references('id')->on('guests')->onDelete('cascade');
 
             $table->unsignedBigInteger('houseId');
-            $table->foreign('houseId')->references('id')->on('houses');
+            $table->foreign('houseId')->references('id')->on('houses')->onDelete('cascade');
 
             $table->datetime('checkIn');
             $table->datetime('checkOut');
             $table->time('arrival');
             $table->double('price',8,2);
             $table->integer('guestN');
+            $table->timestamps();
         });
     }
 

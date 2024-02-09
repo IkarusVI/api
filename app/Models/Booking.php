@@ -6,21 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
 class Booking extends Model
 {
     use HasFactory;
 
     public function guest(): BelongsTo
     {
-        return $this->belongsTo(Guest::class);
+        return $this->belongsTo(Guest::class, 'guestId');
     }
     public function host(): BelongsTo
     {
-        return $this->belongsTo(Host::class);
+        return $this->belongsTo(Host::class, 'hostId');
     }
     public function house(): BelongsTo
     {
-        return $this->belongsTo(House::class);
+        return $this->belongsTo(House::class, 'houseId');
     }
     
 }

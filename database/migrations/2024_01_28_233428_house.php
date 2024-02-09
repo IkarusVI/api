@@ -16,13 +16,14 @@ return new class extends Migration
             $table->string('image');
 
             $table->unsignedBigInteger('host_id');
-            $table->foreign('host_id')->references('id')->on('hosts');
+            $table->foreign('host_id')->references('id')->on('hosts')->onDelete('cascade');
         
             $table->string('name');
             $table->string('location');
             $table->text('description');
             $table->double('price',8,2);
             $table->integer('maxGuests');
+            $table->timestamps();
         });
     }
 

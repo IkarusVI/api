@@ -11,23 +11,37 @@ class LoginController extends Controller
     protected function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email:rfc',
+            'email' => 'sometimes|required_without:username|email:rfc',
+            'username' => 'sometimes|required_without:email',
             'password' => 'required'
         ]);
 
-        if (Auth::guard('host')->attempt($credentials)) {
-            return Auth::guard('host')->user()->createToken("token");
-        }
+        $token = $request->bearerToken();
+        
+        if(!$token || !Auth::guard('sanctum')->check()){
 
-        if (Auth::guard('guest')->attempt($credentials)) {
-            return Auth::guard('guest')->user()->createToken("token");
-        }
+            $guards = ['host', 'guest', 'admin'];
 
-        if (Auth::guard('admin')->attempt($credentials)) {
-            return Auth::guard('admin')->user()->createToken("token");
-        }
+            foreach ($guards as $guard) {
+                if (Auth::guard($guard)->attempt($credentials)) {
+                    return Auth::guard($guard)->user()->createToken("token");
+                }
+            }
 
-        return 'Correo electrónico o contraseña incorrectos';
+            $msg = [
+                'msg' => 'Credenciales Incorrectas',
+                'status' => 'failed',
+                'code'=> 400
+            ];
+            
+            return response()->json($msg);
+        }
+        $msg = [
+            'msg' => 'Ya estás logueado',
+            'status' => 'failed',
+            'code'=> 400
+        ];
+        return response()->json($msg);
     }
 
     protected function identify(Request $request)
@@ -38,19 +52,21 @@ class LoginController extends Controller
 
     protected function killToken(Request $request)
     {
-        // Obtener el usuario autenticado adjuntado al objeto $request
         $user = $request->user;
-    
-        // Verificar si el usuario está autenticado
         if ($user) {
-            // Cerrar la sesión del usuario y revocar todos los tokens
             $user->tokens()->delete();
-    
-            // Devolver un mensaje de éxito
-            return response()->json(['msg' => 'Sesión cerrada y tokens eliminados con éxito']);
-        } else {
-            // Devolver un mensaje de error si no hay usuario autenticado
-            return response()->json(['error' => 'Usuario no autenticado'], 401);
+            $msg = [
+                'msg' => 'Sesión cerrada y tokens eliminados',
+                'status' => 'sucess',
+                'code'=> 200
+            ];
+            return response()->json($msg);
         }
+        $msg = [
+            'msg' => 'Usuario no autenticado',
+            'status' => 'failed',
+            'code'=> 400
+        ];
+        return response()->json($msg);
     }
 }

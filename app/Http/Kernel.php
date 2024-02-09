@@ -5,6 +5,10 @@ namespace App\Http;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\ValidateEmail;
 use App\Http\Middleware\ValidateLogin;
+use App\Http\Middleware\ValidateId;
+use App\Http\Middleware\ValidateAdminPermissions;
+use App\Http\Middleware\ValidateHostPermissions;
+use App\Http\Middleware\ValidateGuestPermissions;
 
 class Kernel extends HttpKernel
 {
@@ -68,5 +72,9 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'validate.email' => ValidateEmail::class,
         'validate.login' => ValidateLogin::class,
+        'validate.id' => ValidateId::class,
+        'validate.admin.permissions' => ValidateAdminPermissions::class,
+        'validate.host.permissions' => ValidateHostPermissions::class,
+        'validate.guest.permissions' => ValidateGuestPermissions::class,
     ];
 }
