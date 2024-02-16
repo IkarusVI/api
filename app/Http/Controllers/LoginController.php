@@ -43,13 +43,13 @@ class LoginController extends Controller
         ];
         return response()->json($msg);
     }
-
+    
     protected function identify(Request $request)
     {
         $user = $request->user;
         return response($user);   
     }
-
+    
     protected function killToken(Request $request)
     {
         $user = $request->user;

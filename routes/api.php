@@ -117,7 +117,8 @@ Route::prefix('favorite')->controller(FavoriteController::class)->group(function
 
 // RUTAS GENERALES DE AUTENTICACIÓN 
 Route::get('/logout', [LoginController::class,'killToken'])->middleware('validate.login');
+Route::post('/login', [LoginController::class,'login']);
 
 Route::get('/profile',[LoginController::class,'identify'])->middleware('validate.login');
 
-Route::post('/login', [LoginController::class,'login']);
+
