@@ -26,8 +26,7 @@ class ValidateGuestPermissions
         if (!$token) {
             $msg = [
                 'msg' => 'Acceso Denegado, Inicia Sesión Como Guest',
-                'status' => 'failed',
-                'code'=> 401
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -39,8 +38,7 @@ class ValidateGuestPermissions
             if($userClass!='Guest'){
                 $msg = [
                     'msg' => 'Acceso denegado guest',
-                    'status' => 'failed',
-                    'code'=> 401
+                    'status' => '400',
                 ];
                 return response()->json($msg); 
             }
@@ -48,8 +46,7 @@ class ValidateGuestPermissions
         }
         $msg = [
             'msg' => 'tu sesión ha caducado',
-            'status' => 'failed',
-            'code'=> 401
+            'status' => '400',
         ];
 
         return response()->json($msg);      

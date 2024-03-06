@@ -15,8 +15,7 @@ class AdminController extends Controller
 
         $msg= [
             'msg' => 'Listado cargado con éxito',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $admin
         ];
 
@@ -29,15 +28,13 @@ class AdminController extends Controller
         if (!$admin) {
             $msg = [
                 'msg' => 'Admin no encontrado',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
         $msg = [
             'msg' => 'Admin Encontrado',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $admin
         ];
 
@@ -49,8 +46,7 @@ class AdminController extends Controller
         if($request->password==null || $request->email==null || $request->userName==null){
             $msg = [
                 'msg' => 'Uno o mas campos vacios',
-                'status' => 'failed',
-                'code' => '201',
+                'status' => '400',
             ];
 
             return response()->json($msg);
@@ -76,8 +72,7 @@ class AdminController extends Controller
 
                 $msg = [
                     'msg' => 'Nuevo admin creado con éxito',
-                    'status' => 'success',
-                    'code' => '201',
+                    'status' => '200',
                     'data' => $admin
                 ];
                 return response()->json($msg);
@@ -85,8 +80,7 @@ class AdminController extends Controller
     
             $msg= [
                 'msg' => 'Email no es válido',
-                'status' => 'failed',
-                'code' => '400'
+                'status' => '400',
             ];
     
             return response()->json($msg);
@@ -95,8 +89,7 @@ class AdminController extends Controller
         $msg = [
 
             'msg' => 'Este admin ya existe',
-            'status' => 'failed',
-            'code' => '400',
+            'status' => '400',
         ];
         return response()->json($msg);
      
@@ -106,16 +99,15 @@ class AdminController extends Controller
     {
         
         $validator = Validator::make($request->all(), [
-            'password' =>   'required_without_all:username,email',
-            'username' =>   'required_without_all:password,email',
-            'email'    =>   'required_without_all:password,username|email',
+            'password' =>   'required_without_all:userName,email',
+            'userName' =>   'required_without_all:password,email',
+            'email'    =>   'required_without_all:password,userName|email',
         ]);
 
         if ($validator->fails()) {
             $msg = [
                 'msg' => 'Debe proporcionar al menos un campo',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -124,8 +116,7 @@ class AdminController extends Controller
         if (!$admin) {
             $msg = [
                 'msg' => 'No se encontró al administrador',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -137,8 +128,7 @@ class AdminController extends Controller
             if (Hash::check($newPassword, $oldPassword)) {
                 $msg = [
                     'msg' => 'La contraseña no ha cambiado ya que es idéntica a la anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -146,13 +136,12 @@ class AdminController extends Controller
             $admin->password = Hash::make($newPassword);
         }
 
-        if ($request->filled('username')) {
-            $newUsername = $request->input('username');
+        if ($request->filled('userName')) {
+            $newUsername = $request->input('userName');
             if ($newUsername === $admin->userName) {
                 $msg = [
                     'msg' => 'El username no ha cambiado ya que es idéntico al anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -164,8 +153,7 @@ class AdminController extends Controller
             if ($newEmail === $admin->email) {
                 $msg = [
                     'msg' => 'El email no ha cambiado ya que es idéntico al anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -176,8 +164,7 @@ class AdminController extends Controller
 
         $msg = [
             'msg' => 'Datos actualizados correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $admin
         ];
         
@@ -193,8 +180,7 @@ class AdminController extends Controller
         if (!$admin) {
             $msg = [
                 'msg' => 'Usuario no encontrado',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -202,8 +188,7 @@ class AdminController extends Controller
         $admin->delete();
         $msg = [
             'msg' => 'Usuario eliminado correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $admin
         ];
 

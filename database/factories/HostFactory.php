@@ -21,6 +21,7 @@ class HostFactory extends Factory
             'email'    => $this->faker->email(),
             'userName'     => $this->faker->userName,
             'password' => Hash::make($this->faker->password()),
+            'balance'  => $this->faker->randomFloat(2, 0, 1000), 
         ];
     }
 }

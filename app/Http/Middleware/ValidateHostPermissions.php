@@ -26,8 +26,7 @@ class ValidateHostPermissions
         if (!$token) {
             $msg = [
                 'msg' => 'Acceso Denegado, Inicia Sesión Como Host',
-                'status' => 'failed',
-                'code'=> 401
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -39,8 +38,7 @@ class ValidateHostPermissions
             if($userClass!='Host'){
                 $msg = [
                     'msg' => 'Acceso denegado host',
-                    'status' => 'failed',
-                    'code'=> 401
+                    'status' => '400',
                 ];
                 return response()->json($msg); 
             }
@@ -48,8 +46,7 @@ class ValidateHostPermissions
         }
         $msg = [
             'msg' => 'tu sesión ha caducado',
-            'status' => 'failed',
-            'code'=> 401
+            'status' => '400',
         ];
 
         return response()->json($msg);      

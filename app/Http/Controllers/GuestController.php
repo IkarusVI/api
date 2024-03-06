@@ -5,6 +5,10 @@ use Illuminate\Http\Request;
 use App\Models\Guest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Models\House;
+use App\Http\Controllers\HouseController;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
 
 class GuestController extends Controller
 {
@@ -15,8 +19,7 @@ class GuestController extends Controller
 
         $msg= [
             'msg' => 'Listado cargado con éxito',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $guest
         ];
 
@@ -28,15 +31,13 @@ class GuestController extends Controller
         if (!$guest) {
             $msg = [
                 'msg' => 'Guest no encontrado',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400'
             ];
             return response()->json($msg);
         }
         $msg = [
             'msg' => 'Guest Encontrado',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $guest
         ];
 
@@ -47,8 +48,7 @@ class GuestController extends Controller
         if($request->password==null || $request->email==null || $request->userName==null){
             $msg = [
                 'msg' => 'Uno o mas campos vacios',
-                'status' => 'failed',
-                'code' => '201',
+                'status' => '400',
             ];
 
             return response()->json($msg);
@@ -74,8 +74,7 @@ class GuestController extends Controller
 
                 $msg = [
                     'msg' => 'Nuevo guest creado con éxito',
-                    'status' => 'success',
-                    'code' => '201',
+                    'status' => '200',
                     'data' => $guest
                 ];
                 return response()->json($msg);
@@ -84,8 +83,7 @@ class GuestController extends Controller
     
             $msg= [
                 'msg' => 'Email no es válido',
-                'status' => 'failed',
-                'code' => '400'
+                'status' => '400',
             ];
     
             return response()->json($msg);
@@ -94,8 +92,7 @@ class GuestController extends Controller
         $msg = [
 
             'msg' => 'Este guest ya existe',
-            'status' => 'failed',
-            'code' => '400',
+            'status' => '400',
         ];
         return response()->json($msg);
      
@@ -103,16 +100,15 @@ class GuestController extends Controller
     protected function modify(Request $request, $id=null)
     {
         $validator = Validator::make($request->all(), [
-            'password' =>   'required_without_all:username,email',
-            'username' =>   'required_without_all:password,email',
-            'email'    =>   'required_without_all:password,username|email',
+            'password' =>   'required_without_all:userName,email',
+            'userName' =>   'required_without_all:password,email',
+            'email'    =>   'required_without_all:password,userName|email',
         ]);
     
         if ($validator->fails()) {
             $msg = [
                 'msg' => 'Debe proporcionar al menos un campo',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -124,8 +120,7 @@ class GuestController extends Controller
         if (!$guest) {
             $msg = [
                 'msg' => 'No se encontró al guest',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -137,8 +132,7 @@ class GuestController extends Controller
             if (Hash::check($newPassword, $oldPassword)) {
                 $msg = [
                     'msg' => 'La contraseña no ha cambiado ya que es idéntica a la anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -146,13 +140,12 @@ class GuestController extends Controller
             $guest->password = Hash::make($newPassword);
         }
     
-        if ($request->filled('username')) {
-            $newUsername = $request->input('username');
+        if ($request->filled('userName')) {
+            $newUsername = $request->input('userName');
             if ($newUsername === $guest->userName) {
                 $msg = [
                     'msg' => 'El username no ha cambiado ya que es idéntico al anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -164,8 +157,7 @@ class GuestController extends Controller
             if ($newEmail === $guest->email) {
                 $msg = [
                     'msg' => 'El email no ha cambiado ya que es idéntico al anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -176,8 +168,7 @@ class GuestController extends Controller
     
         $msg = [
             'msg' => 'Datos actualizados correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '400',
             'data' => $guest
         ];
         return response()->json($msg);
@@ -192,16 +183,14 @@ class GuestController extends Controller
         if (!$guest){
             $msg = [
                 'msg' => 'Host no encontrado',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
         $guest->delete();
         $msg = [
             'msg' => 'Guest eliminado correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $guest
         ];
 
@@ -219,8 +208,7 @@ class GuestController extends Controller
         $bookings = $guest->bookings;
         $msg = [
             'msg' => 'Reservas del host '.$guest->id,
-            'status' => 'success',
-            'code' => '201',
+            'status' => '200',
             'data' => $bookings
         ];
         return response()->json($msg);
@@ -228,20 +216,57 @@ class GuestController extends Controller
     }
     
     protected function getFavorites(Request $request, $id=null){
-         
-        if($id){
-            $guest = Guest::findOrFail($id);
-        }else{
-            $guest = Guest::findOrFail($request->user->id);
+        
+        $userId = $id ? $id : $request->user->id;
+        $guest = Guest::findOrFail($userId);
+        $favorites = $guest->favorites;
+        $houses = [];
+
+        foreach ($favorites as $favorite) {
+            $id = $favorite->houseId;
+            $house = House::where('id',$id)->first();
+    
+            $houses[] = $house;
         }
 
-        $favorites = $guest->favorites;
         $msg = [
-            'msg' => 'favoritos del guest '.$guest->id,
-            'status' => 'success',
-            'code' => '201',
-            'data' => $favorites
+            'msg' => 'Casas favoritas del usuario ' . $guest->userName,
+            'status' => '200',
+            'data' => $houses
         ];
+    
         return response()->json($msg);
     }
+    protected function redirect(Request $request){
+        $url = Socialite::driver('google')->stateless()->redirect()->getTargetUrl();
+        return response()->json(['url' => $url]);
+    }
+    public function callback(Request $request){
+        $user = Socialite::driver('google')->stateless()->user();
+    
+        $existingGuest = Guest::where('email', $user->email)
+        ->orWhere('googleId', $user->id)
+        ->first();
+        
+
+        if(!$existingGuest){
+            $newGuest = new Guest();
+            $newGuest->userName = $user->name;
+            $newGuest->email = $user->email;
+            $newGuest->googleId = $user->id;
+            $newGuest->save();
+        }else{
+            Auth::login($existingGuest);
+            $token = $existingGuest->createToken("token")->plainTextToken;
+            
+            $msg = [
+                'msg' => 'Bienvenido',
+                'status' => '200',
+                'data'=> $token
+            ];
+            return $msg;
+        }
+
+    }    
+    
 }

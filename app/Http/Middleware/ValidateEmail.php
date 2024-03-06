@@ -26,8 +26,7 @@ class ValidateEmail
 
         $msg= [
             'msg' => 'Email no es válido',
-            'status' => 'failed',
-            'code' => '400'
+            'status' => '400',
         ];
 
         return response()->json($msg);

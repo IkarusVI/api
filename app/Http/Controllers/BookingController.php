@@ -5,6 +5,7 @@ use App\Models\House;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use App\Models\Host;
 use DateTime;
 
 class BookingController extends Controller
@@ -14,8 +15,7 @@ class BookingController extends Controller
 
         $msg= [
             'msg' => 'Listado cargado con éxito',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $booking
         ];
 
@@ -27,15 +27,13 @@ class BookingController extends Controller
         if (!$booking) {
             $msg = [
                 'msg' => 'Reserva no encontrada',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
         $msg = [
             'msg' => 'Reserva encontrada',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $booking
         ];
 
@@ -53,8 +51,7 @@ class BookingController extends Controller
         if ($validator->fails()) {
             $msg = [
                 'msg' => 'Uno o más campos vacios',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -65,8 +62,7 @@ class BookingController extends Controller
         if ($checkIn >= $checkOut) {
             $msg = [
                 'msg' => 'Fechas de check-in y check-out no válidas',
-                'status' => 'failed',
-                'code' => '409',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -89,8 +85,7 @@ class BookingController extends Controller
         if ($existingBookings->isNotEmpty()) {
             $msg = [
                 'msg' => 'La casa ya está reservada en esas fechas',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -104,8 +99,7 @@ class BookingController extends Controller
         if ($house->maxGuests < $request->guestN) {
             $msg = [
                 'msg' => 'Número máximo de huespedes alcanzado',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -126,11 +120,16 @@ class BookingController extends Controller
         $booking->guestN = $request->guestN;
     
         $booking->save();
-    
+
+        $moneyForHost = $booking->price * 0.95;
+
+        $host = Host::find($hostId);
+        $host->balance += $moneyForHost;
+        $host->save();
+        
         $msg = [
             'msg' => 'Reserva creada correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data'=> $booking
         ];
         return response()->json($msg);
@@ -143,8 +142,7 @@ class BookingController extends Controller
         if (!$booking) {
             $msg = [
                 'msg' => 'Reserva no encontrada',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -152,8 +150,7 @@ class BookingController extends Controller
         $booking->delete();
         $msg = [
             'msg' => 'Reserva eliminada correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $booking
         ];
 

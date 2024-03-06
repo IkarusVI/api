@@ -13,6 +13,12 @@ class Host extends Authenticatable
 {
     use HasFactory, HasApiTokens;
 
+    protected $hidden = [
+        'password', 
+        'created_at',
+        'updated_at'
+    ];
+
     public function houses(): HasMany
     {
         return $this->hasMany(House::class,   'host_id');

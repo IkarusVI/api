@@ -20,8 +20,7 @@ class ValidateId
         if (!is_numeric($id) || intval($id) != $id) {
             $msg = [
                 'msg' => 'La ID debe ser numérica y entera.',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }

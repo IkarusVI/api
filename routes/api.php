@@ -9,10 +9,14 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\HouseController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\StripePaymentController;
+use Laravel\Socialite\Facades\Socialite;
 
 
+/* 
+Route::get('/google-auth/redirect', [LoginController::class, 'redirect']);
+Route::get('/google-auth/callback', [LoginController::class, 'callback']);
 
-/*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
@@ -26,6 +30,8 @@ use App\Http\Controllers\BookingController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/checkout/{price}', [StripePaymentController::class, 'getMoney'])->middleware('validate.guest.permissions');
 
 //ACCESO PERMITIDO SOLO A ADMINISTRADORES
 Route::prefix('admin')->controller(AdminController::class)->middleware('validate.admin.permissions')->group(function () {
@@ -83,6 +89,7 @@ Route::prefix('house')->controller(HouseController::class)->group(function () {
 
     //ACCESO HOST
     Route::post('/'         ,'create')->middleware('validate.host.permissions');
+    Route::post('/img'      ,'storeImg')->middleware('validate.host.permissions');
 
     //ACCESO MIXTO ADMIN Y HOST 
     Route::put('/{id}'      ,'modify')->middleware('validate.login');
@@ -111,7 +118,7 @@ Route::prefix('favorite')->controller(FavoriteController::class)->group(function
     
     //ACCESO PARA GUEST
     Route::delete('/{id}'   ,'delete')->middleware('validate.guest.permissions')->middleware('validate.id');
-    Route::post('/{id}'     ,'create')->middleware('validate.guest.permissions')->middleware('validate.id');
+    Route::post('/'         ,'create')->middleware('validate.guest.permissions');
 });
 
 
@@ -120,5 +127,7 @@ Route::get('/logout', [LoginController::class,'killToken'])->middleware('validat
 Route::post('/login', [LoginController::class,'login']);
 
 Route::get('/profile',[LoginController::class,'identify'])->middleware('validate.login');
+Route::get('/search/{input}',[HouseController::class,'search']);
 
-
+Route::post('/checkout',[StripePaymentController::class,'stripeGuestPay']);
+Route::post('/getMoney',[StripePaymentController::class,'stripeHostGetMoney']);

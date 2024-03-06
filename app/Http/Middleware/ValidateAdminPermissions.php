@@ -26,8 +26,7 @@ class ValidateAdminPermissions
         if (!$token) {
             $msg = [
                 'msg' => 'Acceso Denegado, Inicia Sesión Como Admin',
-                'status' => 'failed',
-                'code'=> 401
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -39,8 +38,7 @@ class ValidateAdminPermissions
             if($userClass!='Admin'){
                 $msg = [
                     'msg' => 'Acceso denegado admin',
-                    'status' => 'failed',
-                    'code'=> 401
+                    'status' => '400',
                 ];
                 return response()->json($msg); 
             }
@@ -48,8 +46,7 @@ class ValidateAdminPermissions
         }
         $msg = [
             'msg' => 'tu sesión ha caducado',
-            'status' => 'failed',
-            'code'=> 401
+            'status' => '400',
         ];
 
         return response()->json($msg);      

@@ -15,8 +15,7 @@ class HouseController extends Controller
 
         $msg= [
             'msg' => 'Listado cargado con éxito',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $house
         ];
 
@@ -27,15 +26,13 @@ class HouseController extends Controller
         if (!$house) {
             $msg = [
                 'msg' => 'Casa no encontrada',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
         $msg = [
             'msg' => 'Casa Encontrado',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $house
         ];
 
@@ -59,8 +56,7 @@ class HouseController extends Controller
         if ($validator->fails()) {
             $msg = [
                 'msg' => 'Uno o más campos vacíos',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
                 'errors' => $validator->errors()
             ];
             return response()->json($msg);
@@ -78,9 +74,8 @@ class HouseController extends Controller
 
         $msg = [
             'msg' => 'Casa creada correctamente',
-            'status' => 'success',
-            'code' => '200',
-            'errors' => $house
+            'status' => '200',
+            'data' => $house
         ];
         return response()->json($msg);
     }
@@ -89,8 +84,7 @@ class HouseController extends Controller
         if($request->class=='Guest'){
             $msg = [
                 'msg' => 'Acceso no permitido',
-                'status' => 'failed',
-                'code' => '401',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -107,8 +101,7 @@ class HouseController extends Controller
         if ($validator->fails()) {
             $msg = [
                 'msg' => 'Debe proporcionar al menos un campo',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }   
@@ -118,8 +111,7 @@ class HouseController extends Controller
             if($house->host_id != $request->user->id){
                 $msg = [
                     'msg' => 'No puedes modificar una casa que no es tuya',
-                    'status' => 'failed',
-                    'code' => '404',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -128,8 +120,7 @@ class HouseController extends Controller
         if (!$house) {
             $msg = [
                 'msg' => 'La casa no fue encontrada',
-                'status' => 'failed',
-                'code' => '404',
+                'status' => '400',
             ];
             return response()->json($msg);
         }    
@@ -149,8 +140,7 @@ class HouseController extends Controller
                 if ($newValue === $house->$attributeKey) {
                     $msg = [
                         'msg' => "El atributo: $attributeName no ha cambiado ya que es idéntico al anterior",
-                        'status' => 'failed',
-                        'code' => '400',
+                        'status' => '400',
                     ];
                     return response()->json($msg);
                 }
@@ -162,8 +152,7 @@ class HouseController extends Controller
     
         $msg = [
             'msg' => 'Datos actualizados correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $house
         ];
         return response()->json($msg);
@@ -178,8 +167,7 @@ class HouseController extends Controller
         if($request->class=='Guest'){
             $msg = [
                 'msg' => 'Acceso no permitido',
-                'status' => 'failed',
-                'code' => '401',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -189,8 +177,7 @@ class HouseController extends Controller
         if (!$house) {
             $msg = [
                 'msg' => 'Casa no encontrada',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -199,22 +186,71 @@ class HouseController extends Controller
             if($house->host_id != $request->user->id){
                 $msg = [
                     'msg' => 'No puedes borrar una casa que no es tuya',
-                    'status' => 'failed',
-                    'code' => '404',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
         }
+        $imagePath = null;
+        if (strpos($house->image, 'http://127.0.0.1:8000/storage/') === 0) {
+            $imageName = str_replace('http://127.0.0.1:8000/storage/', '', $house->image);
+            $imagePath = storage_path('app/public/' . $imageName);
+        }
+
+        $house->bookings()->delete();
+        $house->delete();
+    
+        if ($imagePath !== null && file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+        
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+
         $house->bookings()->delete();
         $house->delete();
     
         $msg = [
             'msg' => 'Casa eliminada correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $house
         ];
 
            return response()->json($msg);
+    }
+    protected function storeImg(Request $request){
+        $file = $request->file('img');
+        $url=$file->store('public');
+        $imgUrl=str_replace('public', 'storage', $url);
+        $prefixUrl='http://127.0.0.1:8000/';
+        $finalUrl = $prefixUrl . $imgUrl;
+
+        $msg = [
+            'msg' => 'imagen cargada correctamente',
+            'status' => '200',
+            'data' => $finalUrl
+        ];
+        return $msg;
+    }
+    protected function search(Request $request, $input){
+        $location = $input;
+
+        $houses = House::where('location', 'like', '%' . $location . '%')->get();
+    
+        if ($houses->isEmpty()) {
+            $msg = [
+                'msg' => 'No se encontraron casas en la ubicación especificada',
+                'status' => '400',
+            ];
+            return response()->json($msg);
+        }
+    
+        $msg = [
+            'msg' => 'Casas encontradas',
+            'status' => '200',
+            'data' => $houses
+        ];
+        return response()->json($msg);
     }
 }

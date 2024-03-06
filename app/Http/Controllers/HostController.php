@@ -15,8 +15,7 @@ class HostController extends Controller
 
         $msg= [
             'msg' => 'Listado cargado con éxito',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $host
         ];
 
@@ -29,15 +28,13 @@ class HostController extends Controller
         if (!$host) {
             $msg = [
                 'msg' => 'Host no encontrado',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '400',
             ];
             return response()->json($msg);
         }
         $msg = [
             'msg' => 'Host Encontrado',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $host
         ];
 
@@ -49,8 +46,7 @@ class HostController extends Controller
         if($request->password==null || $request->email==null || $request->userName==null){
             $msg = [
                 'msg' => 'Uno o mas campos vacios',
-                'status' => 'failed',
-                'code' => '201',
+                'status' => '400',
             ];
 
             return response()->json($msg);
@@ -76,8 +72,7 @@ class HostController extends Controller
 
                 $msg = [
                     'msg' => 'Nuevo host creado con éxito',
-                    'status' => 'success',
-                    'code' => '201',
+                    'status' => '200',
                     'data' => $host
                 ];
                 return response()->json($msg);
@@ -86,8 +81,7 @@ class HostController extends Controller
     
             $msg= [
                 'msg' => 'Email no es válido',
-                'status' => 'failed',
-                'code' => '400'
+                'status' => '400',
             ];
     
             return response()->json($msg);
@@ -96,8 +90,7 @@ class HostController extends Controller
         $msg = [
 
             'msg' => 'Este host ya existe',
-            'status' => 'failed',
-            'code' => '400',
+            'status' => '400',
         ];
         return response()->json($msg);
      
@@ -106,16 +99,15 @@ class HostController extends Controller
     protected function modify(Request $request, $id=null)
     {
         $validator = Validator::make($request->all(), [
-            'password' =>   'required_without_all:username,email',
-            'username' =>   'required_without_all:password,email',
-            'email'    =>   'required_without_all:password,username|email',
+            'password' =>   'required_without_all:userName,email',
+            'userName' =>   'required_without_all:password,email',
+            'email'    =>   'required_without_all:password,userName|email',
         ]);
     
         if ($validator->fails()) {
             $msg = [
                 'msg' => 'Debe proporcionar al menos un campo',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -129,8 +121,7 @@ class HostController extends Controller
         if (!$host) {
             $msg = [
                 'msg' => 'No se encontró al host',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -142,8 +133,7 @@ class HostController extends Controller
             if (Hash::check($newPassword, $oldPassword)) {
                 $msg = [
                     'msg' => 'La contraseña no ha cambiado ya que es idéntica a la anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -151,13 +141,12 @@ class HostController extends Controller
             $host->password = Hash::make($newPassword);
         }
     
-        if ($request->filled('username')) {
-            $newUsername = $request->input('username');
+        if ($request->filled('userName')) {
+            $newUsername = $request->input('userName');
             if ($newUsername === $host->userName) {
                 $msg = [
-                    'msg' => 'El username no ha cambiado ya que es idéntico al anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'msg' => 'El userName no ha cambiado ya que es idéntico al anterior',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -169,8 +158,7 @@ class HostController extends Controller
             if ($newEmail === $host->email) {
                 $msg = [
                     'msg' => 'El email no ha cambiado ya que es idéntico al anterior',
-                    'status' => 'failed',
-                    'code' => '400',
+                    'status' => '400',
                 ];
                 return response()->json($msg);
             }
@@ -181,8 +169,7 @@ class HostController extends Controller
     
         $msg = [
             'msg' => 'Datos actualizados correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $host
         ];
         return response()->json($msg);
@@ -199,23 +186,20 @@ class HostController extends Controller
         if (!$host) {
             $msg = [
                 'msg' => 'Host no encontrado',
-                'status' => 'failed',
-                'code' => '404'
+                'status' => '404',
             ];
             return response()->json($msg, 404);
         }
         $host->delete();
         $msg = [
             'msg' => 'Host eliminado correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $host
         ];
 
         return response()->json($msg);
 
     }
-
     protected function getBookings(Request $request, $id=null){
         
         if($id){
@@ -227,8 +211,7 @@ class HostController extends Controller
         $bookings = $host->bookings;
         $msg = [
             'msg' => 'Reservas del host '.$host->id,
-            'status' => 'success',
-            'code' => '201',
+            'status' => '200',
             'data' => $bookings
         ];
         return response()->json($msg);
@@ -244,8 +227,7 @@ class HostController extends Controller
         $houses = $host->houses;
         $msg = [
             'msg' => 'Casas del host '.$host->id,
-            'status' => 'success',
-            'code' => '201',
+            'status' => '200',
             'data' => $houses
         ];
         return response()->json($msg);

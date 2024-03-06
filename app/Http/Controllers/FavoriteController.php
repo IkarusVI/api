@@ -15,25 +15,23 @@ class FavoriteController extends Controller
 
         $msg= [
             'msg' => 'Listado cargado con éxito',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $favorite
         ];
         return response()->json($msg);
     }
-    protected function create(Request $request, $id){
+    protected function create(Request $request){
         $guest = $request->user;
 
         $guestId = $guest->id;
-        $houseId = $id;
+        $houseId = $request->id;
 
         $house = House::find($houseId);
 
         if (!$house) {
             $msg = [
                 'msg' => 'La casa con la ID proporcionada no existe',
-                'status' => 'failed',
-                'code' => '404',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -45,8 +43,7 @@ class FavoriteController extends Controller
         if ($existingFavorite) {
             $msg = [
                 'msg' => 'Ya tienes esta casa agregada a favoritos',
-                'status' => 'failed',
-                'code' => '400',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -59,47 +56,42 @@ class FavoriteController extends Controller
 
         $msg = [
             'msg' => 'Casa agregada a favoritos',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
         ];
         return response()->json($msg);
 
     }
     protected function delete(Request $request, $id){
-        $favorite=Favorite::where('id',$id)->first();
+        $ownerId   = $request->user->id;
+        $houseId = $request->id; 
+        
+        $favorite = Favorite::where('ownerId', $ownerId)
+                        ->where('houseId', $houseId)
+                        ->first();
+    
         if(!$favorite){
             $msg = [
                 'msg' => 'Favorito no encontrado',
-                'status' => 'failed',
-                'code' => '404',
+                'code' => '400',
             ];
             return response()->json($msg);
         }
-  
+    
         if($favorite->ownerId != $request->user->id){
             $msg = [
                 'msg' => 'No puedes borrar un favorito que no es tuyo',
-                'status' => 'failed',
-                'code' => '404',
+                'status' => '400',
             ];
             return response()->json($msg);
         }
         
-        if (!$favorite) {
-            $msg = [
-                'msg' => 'Favorito no encontrada',
-                'status' => 'failed',
-                'code' => '404'
-            ];
-            return response()->json($msg);
-        }
         $favorite->delete();
         $msg = [
             'msg' => 'Favorito eliminado correctamente',
-            'status' => 'success',
-            'code' => '200',
+            'status' => '200',
             'data' => $favorite
         ];
         return response()->json($msg);
     }
+    
 }

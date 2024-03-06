@@ -13,6 +13,12 @@ class Guest extends Authenticatable
 {
     use HasFactory, HasApiTokens;
 
+    protected $hidden = [
+        'password', 
+        'created_at',
+        'updated_at'
+    ];
+
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'guestId');

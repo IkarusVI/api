@@ -26,8 +26,7 @@ class ValidateLogin
         if (!$token) {
             $msg = [
                 'msg' => 'Usuario no identificado',
-                'status' => 'failed',
-                'code'=> 401
+                'status' => '400',
             ];
             return response()->json($msg);
         }
@@ -41,8 +40,7 @@ class ValidateLogin
         }
         $msg = [
             'msg' => 'tu sesión ha caducado',
-            'status' => 'failed',
-            'code'=> 401
+            'status' => '400',
         ];
 
         return response()->json($msg);      

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('guests', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('email')->unique();
+            $table->string('email')->unique()->nullable();
             $table->string('userName');
             $table->string('password');
             $table->timestamps();
